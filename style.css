@@ -1,0 +1,920 @@
+:root {
+  --bg: #f6e7cf;
+  --bg-accent: #e6cba3;
+  --card: #fff6e5;
+  --ink: #4a2c1a;
+  --line: #d4b483;
+  --ol: #2a1630;
+  --gold: #f5b942;
+  --shadow: rgba(42, 22, 48, 0.22);
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #261710;
+    --bg-accent: #140b07;
+    --card: #362218;
+    --ink: #faebd7;
+    --line: #755038;
+    --ol: #110714;
+    --gold: #ffca57;
+    --shadow: rgba(0, 0, 0, 0.55);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #261710;
+  --bg-accent: #140b07;
+  --card: #362218;
+  --ink: #faebd7;
+  --line: #755038;
+  --ol: #110714;
+  --gold: #ffca57;
+  --shadow: rgba(0, 0, 0, 0.55);
+}
+
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: radial-gradient(circle at 50% 50%, var(--bg) 0%, var(--bg-accent) 100%);
+  color: var(--ink);
+  font: 600 15px "Baloo 2", ui-rounded, system-ui, sans-serif;
+  overflow: hidden;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  background-size: 28px 28px;
+  animation: moveDotsTopRight 6s linear infinite;
+}
+
+@keyframes moveDotsTopRight {
+  0% {
+    background-position: 0px 0px;
+  }
+  100% {
+    background-position: 28px -28px;
+  }
+}
+
+#app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* === 1. THANH THÔNG SỐ TRÊN CÙNG (HUD CAO CẤP) === */
+#hud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 16px;
+  background: linear-gradient(180deg, var(--card) 0%, var(--bg) 100%);
+  border-bottom: 3px solid var(--ol);
+  box-shadow: 
+    inset 0 2px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -3px 0 var(--line),
+    0 6px 18px var(--shadow);
+  position: relative;
+  z-index: 3;
+  font: 400 22px/1.1 "VT323", monospace;
+}
+
+.chip {
+  background: var(--bg-accent);
+  padding: 5px 14px;
+  border-radius: 10px;
+  border: 2px solid var(--ol);
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.25),
+    0 2px 0 var(--line);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.18s ease;
+}
+
+#rm, #vt, #vw, #gear {
+  cursor: pointer;
+  background: linear-gradient(180deg, var(--card) 0%, var(--bg) 100%);
+  box-shadow: 
+    inset 0 -2px 0 var(--line),
+    0 3px 0 var(--ol);
+}
+
+#rm:hover, #vt:hover, #vw:hover, #gear:hover {
+  transform: translateY(-2px);
+  border-color: var(--gold);
+  filter: brightness(1.1);
+  box-shadow: 
+    inset 0 -2px 0 var(--line),
+    0 5px 0 var(--ol),
+    0 0 12px rgba(255, 202, 87, 0.35);
+}
+
+#rm:active, #vt:active, #vw:active, #gear:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 var(--ol);
+}
+
+#vw {
+  margin: 0 0 0 auto;
+}
+
+#vt, #vw, #gear {
+  padding: 5px 13px;
+}
+
+/* === 2. DÒNG GỢI Ý DẠNG BANNER === */
+#hint {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 16px;
+  margin: 8px auto 2px;
+  max-width: 780px;
+  width: calc(100% - 32px);
+  background: rgba(0, 0, 0, 0.18);
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  color: var(--ink);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  min-height: 1.6em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+/* === 3. SÂN KHẤU CHÍNH & BỐI CẢNH XUNG QUANH === */
+#stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 10px 16px;
+  position: relative;
+  background-color: var(--bg-accent);
+  background-image: 
+    radial-gradient(ellipse at 50% 50%, rgba(255, 202, 87, 0.12) 0%, transparent 65%),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0px, rgba(255, 255, 255, 0.02) 2px, transparent 2px, transparent 12px),
+    repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.08) 0px, rgba(0, 0, 0, 0.08) 2px, transparent 2px, transparent 12px);
+}
+
+#stage::before {
+  content: "";
+  position: absolute;
+  inset: 14px 24px;
+  border: 2px dashed rgba(212, 180, 131, 0.22);
+  border-radius: 20px;
+  pointer-events: none;
+}
+
+#c {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 14px;
+  border: 4px solid var(--ol);
+  box-shadow: 
+    0 0 0 3px var(--gold),
+    0 0 0 6px var(--ol),
+    0 16px 40px rgba(0, 0, 0, 0.65),
+    0 0 35px rgba(255, 190, 75, 0.18);
+  background: var(--card);
+  position: relative;
+  z-index: 1;
+}
+
+/* === 4. BẢNG ĐIỀU KHIỂN DƯỚI CÙNG (CONTROL DOCK) === */
+#nav {
+  display: flex;
+  gap: 12px;
+  padding: 12px 18px 14px;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--card) 100%);
+  border-top: 3px solid var(--ol);
+  box-shadow: 
+    inset 0 3px 0 var(--line),
+    0 -8px 22px var(--shadow);
+  position: relative;
+  z-index: 3;
+}
+
+/* === 5. HỆ THỐNG NÚT BẤM AAA (MẶC ĐỊNH CHỈ SÁNG LÊN KHI HOVER) === */
+.b {
+  position: relative;
+  overflow: hidden;
+  font: 400 23px/1.1 "VT323", monospace;
+  letter-spacing: 0.6px;
+  color: #fff;
+  background: linear-gradient(180deg, var(--bt, #e8656b) 0%, var(--bd, #b8445b) 100%);
+  border: 3px solid var(--ol);
+  border-radius: 12px;
+  padding: 9px 16px;
+  margin: 4px;
+  cursor: pointer;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45);
+  box-shadow: 
+    inset 0 -5px 0 rgba(0, 0, 0, 0.25),
+    inset 0 2px 0 rgba(255, 255, 255, 0.35),
+    0 4px 0 var(--ol),
+    0 7px 14px var(--shadow);
+  transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.18s ease, box-shadow 0.14s ease;
+}
+
+.b:hover:not(:disabled) {
+  filter: brightness(1.13);
+  transform: translateY(-3px);
+  box-shadow: 
+    inset 0 -5px 0 rgba(0, 0, 0, 0.22),
+    inset 0 2px 0 rgba(255, 255, 255, 0.5),
+    0 7px 0 var(--ol),
+    0 10px 20px rgba(255, 202, 87, 0.28);
+}
+
+.b:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 
+    inset 0 -2px 0 rgba(0, 0, 0, 0.25),
+    0 1px 0 var(--ol);
+}
+
+.b:disabled {
+  opacity: 0.5;
+  filter: grayscale(0.7);
+  cursor: not-allowed;
+}
+
+.b.g {
+  --bt: #5ca4d6;
+  --bd: #37719e;
+}
+
+.b.on {
+  --bt: #ffbe55;
+  --bd: #cc7a16;
+  color: #381c0c;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+  box-shadow: 
+    inset 0 -5px 0 rgba(0, 0, 0, 0.2),
+    inset 0 2px 0 rgba(255, 255, 255, 0.65),
+    0 4px 0 var(--ol),
+    0 0 16px rgba(255, 190, 85, 0.45);
+}
+
+.b.big {
+  display: block;
+  width: 100%;
+  font-size: 26px;
+  padding: 12px 20px;
+  border-radius: 14px;
+}
+
+#nav .b {
+  flex: 1;
+  margin: 0;
+  padding: 8px 6px;
+  font-size: 24px;
+}
+#nav .b:nth-child(1) { --bt: #e06d6d; --bd: #a84242; }
+#nav .b:nth-child(2) { --bt: #d98a4e; --bd: #9e5824; }
+#nav .b:nth-child(3) { --bt: #8b6ec7; --bd: #5a4191; }
+#nav .b:nth-child(4) { --bt: #54a882; --bd: #317355; }
+
+#nav .b.on {
+  --bt: #ffbe55;
+  --bd: #cc7a16;
+}
+
+/* === 6. MÀN HÌNH BẮT ĐẦU (#st) & HIỆU ỨNG XOẸT SÁNG RIÊNG CHO NÚT Ở ĐÂY === */
+#st {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(255, 196, 92, 0.16) 0%, transparent 55%),
+    radial-gradient(circle at 50% 50%, var(--card) 0%, var(--bg) 52%, var(--bg-accent) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  padding: 24px;
+  overflow: hidden;
+}
+
+#st::before {
+  content: "";
+  position: absolute;
+  inset: -48px;
+  background-image: 
+    radial-gradient(rgba(255, 202, 87, 0.14) 1.5px, transparent 1.5px),
+    radial-gradient(rgba(212, 180, 131, 0.08) 1.5px, transparent 1.5px);
+  background-size: 48px 48px;
+  background-position: 0 0, 24px 24px;
+  animation: driftBg 15s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes driftBg {
+  from { transform: translate(0px, 0px); }
+  to { transform: translate(48px, -48px); }
+}
+
+#st::after {
+  content: "";
+  position: absolute;
+  width: min(440px, 90vw);
+  height: 410px;
+  background: rgba(24, 13, 9, 0.45);
+  backdrop-filter: blur(8px);
+  border: 3px solid var(--line);
+  border-radius: 26px;
+  box-shadow: 
+    0 0 0 4px var(--ol),
+    0 24px 55px rgba(0, 0, 0, 0.7),
+    inset 0 0 30px rgba(255, 196, 92, 0.08);
+  z-index: -1;
+  pointer-events: none;
+}
+
+#st h1 {
+  font: 400 72px/0.95 "VT323", monospace;
+  margin: 4px 0 0;
+  color: var(--gold);
+  text-shadow: 
+    0 3px 0 #5c3214,
+    0 6px 0 var(--ol),
+    0 12px 24px rgba(255, 190, 75, 0.35);
+  letter-spacing: 3px;
+  animation: floatTitle 3.2s ease-in-out infinite;
+}
+
+@keyframes floatTitle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+#st .b {
+  width: 100%;
+  max-width: 290px;
+  margin: 5px 0;
+}
+
+/* Chỉ các nút ở màn hình bắt đầu (#st .b) mới có vệt xoẹt sáng */
+#st .b::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -130%;
+  width: 65%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 30%,
+    rgba(255, 255, 255, 0.65) 50%,
+    rgba(255, 255, 255, 0.15) 70%,
+    transparent 100%
+  );
+  transform: rotate(25deg);
+  pointer-events: none;
+  transition: none;
+}
+
+#st .b:hover:not(:disabled)::after {
+  left: 150%;
+  transition: left 0.55s ease-in-out;
+}
+
+/* === 7. CỬA SỔ HỘP THOẠI (MODAL CHUNG) === */
+#md {
+  position: fixed;
+  inset: 0;
+  background: rgba(14, 6, 16, 0.72);
+  backdrop-filter: blur(5px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 5;
+}
+
+#md.on {
+  display: flex;
+}
+
+#mb {
+  background: var(--card);
+  padding: 20px;
+  max-width: 460px;
+  width: 100%;
+  max-height: 86%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  box-sizing: border-box;
+  border-radius: 18px;
+  border: 3px solid var(--ol);
+  animation: pop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 
+    inset 0 0 0 4px var(--line),
+    0 8px 0 var(--ol),
+    0 20px 45px rgba(0, 0, 0, 0.65);
+}
+
+#mb::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes pop {
+  from {
+transform: scale(0.86) translateY(14px);
+opacity: 0;
+}
+to {
+transform: scale(1) translateY(0);
+opacity: 1;
+}
+}
+h3 {
+margin: 0 0 12px;
+font: 400 30px/1.1 "VT323", monospace;
+padding-bottom: 6px;
+border-bottom: 3px solid var(--line);
+color: var(--gold);
+text-shadow: 0 2px 0 var(--ol);
+}
+.row {
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 8px 6px;
+border-bottom: 2px dashed var(--line);
+transition: background-color 0.15s ease;
+}
+.row:last-child {
+border-bottom: none;
+}
+.row:hover {
+background: rgba(255, 202, 87, 0.1);
+border-radius: 8px;
+}
+.row > div {
+flex: 1;
+}
+.ic {
+font-size: 28px;
+filter: drop-shadow(0 2px 2px var(--shadow));
+}
+.in {
+width: 100%;
+box-sizing: border-box;
+font: 400 24px "VT323", monospace;
+padding: 6px 12px;
+margin: 8px 0;
+border: 3px solid var(--ol);
+border-radius: 10px;
+box-shadow: inset 0 3px 0 var(--shadow);
+background: var(--bg);
+color: var(--ink);
+outline: none;
+}
+.in:focus {
+box-shadow: inset 0 3px 0 var(--shadow), 0 0 0 3px var(--gold);
+}
+.bar {
+position: relative;
+height: 32px;
+background: var(--bg);
+margin: 14px 4px;
+border-radius: 10px;
+border: 3px solid var(--ol);
+box-shadow: inset 0 3px 6px var(--shadow);
+overflow: hidden;
+}
+.bar i {
+position: absolute;
+top: 0;
+bottom: 0;
+background: linear-gradient(180deg, #ffd166 0%, #f2b738 100%);
+border-left: 2px solid var(--ol);
+border-right: 2px solid var(--ol);
+}
+.bar u {
+position: absolute;
+left: 0;
+top: 0;
+bottom: 0;
+width: 0;
+background: rgba(74, 44, 26, 0.35);
+text-decoration: none;
+}
+.bar b {
+position: absolute;
+top: 2px;
+width: 8px;
+height: 22px;
+margin-left: -4px;
+background: #e8656b;
+border: 2px solid var(--ol);
+border-radius: 4px;
+}
+#hb {
+touch-action: none;
+}
+input[type=range] {
+width: 100%;
+accent-color: #e8656b;
+cursor: pointer;
+}
+.tt {
+position: fixed;
+left: 50%;
+top: 96px;
+transform: translateX(-50%);
+background: var(--ink);
+color: var(--bg);
+padding: 10px 20px;
+font-weight: 700;
+border-radius: 12px;
+border: 3px solid var(--gold);
+z-index: 9;
+max-width: 90%;
+text-align: center;
+pointer-events: none;
+box-shadow: 0 6px 0 var(--ol), 0 12px 24px rgba(0, 0, 0, 0.5);
+animation: tt 2.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes tt {
+0% { opacity: 0; transform: translate(-50%, -12px) scale(0.95); }
+12%, 85% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+100% { opacity: 0; transform: translate(-50%, -8px); }
+}
+#rh {
+position: fixed;
+inset: 0;
+z-index: 6;
+display: none;
+background: #c9bd97;
+touch-action: none;
+}
+#rh canvas {
+width: 100%;
+height: 100%;
+display: block;
+}
+#fsl {
+position: absolute;
+left: 14px;
+width: calc(100% - 28px);
+bottom: 48px;
+display: none;
+}
+#qx {
+position: absolute;
+right: 12px;
+top: calc(10px + env(safe-area-inset-top, 0px));
+}
+/* === 8. GIAO DIỆN TẠO NHÂN VẬT COZY CAFÉ === */
+#mb.cc-modal {
+max-width: 780px;
+width: 95%;
+padding: 0;
+background: #fbf5ea;
+border: 2px solid #8c6d53;
+box-shadow: 0 12px 32px rgba(42, 22, 12, 0.35), inset 0 0 0 3px #f2e6d3;
+color: #4a3222;
+overflow: hidden !important;
+display: flex;
+flex-direction: column;
+}
+.cc-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 12px 20px;
+background: #f2e6d3;
+border-bottom: 2px solid #decbb2;
+}
+.cc-header h3 {
+margin: 0;
+padding: 0;
+border: none;
+color: #5c3a21;
+text-shadow: none;
+font-size: 28px;
+}
+.cc-body {
+display: grid;
+grid-template-columns: 260px 1fr;
+min-height: 390px;
+max-height: 76vh;
+overflow: hidden;
+}
+.cc-left {
+background: radial-gradient(circle at 50% 45%, #fffdf9 0%, #efe2ce 100%);
+border-right: 2px solid #decbb2;
+padding: 18px 16px;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: space-between;
+gap: 10px;
+}
+.cc-canvas-box {
+position: relative;
+width: 210px;
+height: 210px;
+background: #f7efe1;
+border: 2px solid #d5be9f;
+border-radius: 16px;
+box-shadow: inset 0 4px 10px rgba(92, 58, 33, 0.08);
+display: flex;
+align-items: center;
+justify-content: center;
+}
+.cc-moods {
+display: flex;
+gap: 6px;
+}
+.cc-mood-btn {
+background: #fbf5ea;
+border: 1.5px solid #cbb292;
+border-radius: 8px;
+padding: 4px 10px;
+font: 600 13px "Baloo 2", sans-serif;
+color: #5c3a21;
+cursor: pointer;
+transition: all 0.15s ease;
+}
+.cc-mood-btn.on, .cc-mood-btn:hover {
+background: #769478;
+color: #fff;
+border-color: #557057;
+}
+.cc-name-wrap {
+width: 100%;
+}
+.cc-name-wrap label {
+display: block;
+font-size: 12px;
+font-weight: 700;
+color: #8c6d53;
+margin-bottom: 3px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+.cc-name-wrap .in {
+margin: 0;
+background: #fffdf9;
+border: 2px solid #cbb292;
+box-shadow: none;
+color: #4a3222;
+font-size: 22px;
+padding: 5px 10px;
+text-align: center;
+}
+.cc-name-wrap .in:focus {
+border-color: #769478;
+box-shadow: 0 0 0 3px rgba(118, 148, 120, 0.25);
+}
+.cc-right {
+display: flex;
+flex-direction: column;
+min-height: 0;
+overflow: hidden;
+background: #fbf5ea;
+}
+.cc-tabs {
+display: flex;
+gap: 4px;
+padding: 10px 16px 0;
+background: #f5ebd9;
+border-bottom: 2px solid #decbb2;
+overflow-x: auto;
+scrollbar-width: none;
+}
+.cc-tabs::-webkit-scrollbar {
+display: none;
+}
+.cc-tab {
+padding: 7px 14px;
+font: 700 15px "Baloo 2", sans-serif;
+color: #7d6048;
+background: transparent;
+border: 2px solid transparent;
+border-bottom: none;
+border-radius: 10px 10px 0 0;
+cursor: pointer;
+white-space: nowrap;
+transition: all 0.15s ease;
+}
+.cc-tab:hover {
+color: #4a3222;
+background: rgba(255, 255, 255, 0.45);
+}
+.cc-tab.on {
+background: #fbf5ea;
+color: #4a3222;
+border-color: #decbb2;
+margin-bottom: -2px;
+padding-bottom: 9px;
+}
+.cc-panel {
+flex: 1;
+overflow-y: auto;
+scrollbar-width: none;
+padding: 16px 20px;
+display: flex;
+flex-direction: column;
+gap: 16px;
+}
+.cc-panel::-webkit-scrollbar {
+display: none;
+}
+.cc-group-title {
+font-size: 13px;
+font-weight: 700;
+color: #8c6d53;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+margin-bottom: 8px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+.cc-chips {
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+}
+.cc-chip {
+padding: 7px 14px;
+font: 600 15px "Baloo 2", sans-serif;
+background: #f2e6d3;
+color: #5c3a21;
+border: 1.5px solid #d5be9f;
+border-radius: 10px;
+cursor: pointer;
+transition: all 0.14s ease;
+}
+.cc-chip:hover {
+background: #ead9be;
+transform: translateY(-1px);
+}
+.cc-chip.on {
+background: #769478;
+color: #fff;
+border-color: #557057;
+box-shadow: 0 3px 0 #557057;
+}
+.cc-swatches {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+gap: 10px;
+}
+.cc-swatch {
+aspect-ratio: 1;
+border-radius: 12px;
+border: 2px solid rgba(74, 50, 34, 0.25);
+cursor: pointer;
+position: relative;
+transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+.cc-swatch:hover {
+transform: scale(1.08);
+}
+.cc-swatch.on {
+border: 2.5px solid #4a3222;
+box-shadow: 0 0 0 3px #fbf5ea, 0 0 0 5px #769478;
+transform: scale(1.06);
+}
+.cc-swatch.on::after {
+content: "✓";
+position: absolute;
+inset: 0;
+display: flex;
+align-items: center;
+justify-content: center;
+color: #fff;
+font-weight: 800;
+font-size: 16px;
+text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
+}
+.cc-footer {
+padding: 12px 20px;
+background: #f2e6d3;
+border-top: 2px solid #decbb2;
+display: flex;
+justify-content: flex-end;
+gap: 10px;
+}
+.cc-btn-save {
+background: linear-gradient(180deg, #d36268 0%, #e8656b 100%);
+border: 2px solid #d43b42;
+color: #fff;
+font: 400 24px "VT323", monospace;
+padding: 8px 28px;
+border-radius: 12px;
+cursor: pointer;
+box-shadow: 0 4px 0 #913136;
+transition: transform 0.12s ease;
+}
+.cc-btn-save:hover {
+filter: brightness(1.06);
+transform: translateY(-2px);
+}
+.cc-btn-save:active {
+transform: translateY(2px);
+box-shadow: 0 1px 0 #435c45;
+}
+@media (max-width: 680px) {
+.cc-body {
+grid-template-columns: 1fr;
+max-height: 78vh;
+}
+.cc-left {
+flex-direction: row;
+border-right: none;
+border-bottom: 2px solid #decbb2;
+padding: 10px 14px;
+justify-content: center;
+gap: 14px;
+}
+.cc-canvas-box {
+width: 115px;
+height: 115px;
+flex-shrink: 0;
+}
+.cc-left-info {
+display: flex;
+flex-direction: column;
+gap: 8px;
+flex: 1;
+}
+}/* === 9. BẢNG MENU 1 MẶT MÀU NÂU === */
+#mb.menu-board {
+  max-width: 520px;
+  background: linear-gradient(180deg, #4b2e1e 0%, #362014 100%);
+  border: 4px solid #24130a;
+  box-shadow: inset 0 0 0 3px #8c6239, 0 12px 0 #1c0f08, 0 22px 45px rgba(0, 0, 0, 0.75);
+  color: #f7e8d0;
+}
+.mb-head { text-align: center; border-bottom: 2px dashed #8c6239; padding-bottom: 10px; margin-bottom: 12px; }
+.mb-sub { font: 400 18px/1 "VT323", monospace; letter-spacing: 1.5px; color: #d6b68a; }
+.mb-title { font: 400 44px/1 "VT323", monospace; margin: 2px 0 6px; color: #ffda79; text-shadow: 0 3px 0 #1f1108; letter-spacing: 3px; }
+.mb-ribbon { display: inline-block; background: #6e452b; border: 1.5px solid #b58454; padding: 2px 14px; border-radius: 20px; font: 700 13px "Baloo 2", sans-serif; color: #fff4df; }
+.mb-warn { background: rgba(232, 101, 107, 0.2); border: 1.5px solid #e8656b; color: #ffd4d6; padding: 6px 10px; border-radius: 8px; font: 600 14px "Baloo 2", sans-serif; text-align: center; margin-bottom: 10px; }
+.mb-list { display: flex; flex-direction: column; gap: 8px; }
+.mb-item { display: flex; align-items: flex-start; gap: 12px; background: rgba(28, 15, 9, 0.55); border: 1.5px solid #754e32; border-radius: 12px; padding: 10px 12px; cursor: pointer; transition: all 0.16s ease; }
+.mb-item:hover:not(.mb-disabled), .mb-item.open { background: rgba(58, 34, 20, 0.85); border-color: #ffca57; transform: translateY(-1px); }
+.mb-item.mb-disabled { opacity: 0.55; cursor: not-allowed; }
+.mb-pic { width: 46px; height: 46px; background: #26140b; border: 1.5px solid #8c6239; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+.mb-info { flex: 1; min-width: 0; }
+.mb-row-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.mb-name { font: 700 16px "Baloo 2", sans-serif; color: #fff6e6; }
+.mb-price { font: 400 22px/1 "VT323", monospace; color: #ffca57; background: rgba(0, 0, 0, 0.35); padding: 2px 8px; border-radius: 6px; border: 1px solid #8c6239; }
+.mb-desc { font: 600 13.5px "Baloo 2", sans-serif; color: #d6bfa2; margin-top: 2px; line-height: 1.35; }
+.mb-order-box { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.22s ease, opacity 0.2s ease, margin-top 0.2s ease; }
+.mb-item.open .mb-order-box { max-height: 46px; opacity: 1; margin-top: 8px; }
+.mb-order-btn { width: 100%; background: linear-gradient(180deg, #54a882 0%, #317355 100%); border: 2px solid #182920; color: #fff; font: 400 21px/1 "VT323", monospace; padding: 6px 12px; border-radius: 8px; cursor: pointer; box-shadow: 0 3px 0 #182920; }
+.mb-order-btn:disabled { background: #594a42; cursor: not-allowed; }
+.mb-footer { display: flex; justify-content: space-between; font: 600 13.5px "Baloo 2", sans-serif; color: #cbb292; margin-top: 10px; padding-top: 6px; border-top: 1px dashed #754e32; }
+
+/* === 10. ANIMATION MINI-GAME PHA CHẾ === */
+.brew-stage { display: flex; align-items: center; justify-content: center; gap: 18px; min-height: 130px; background: rgba(0, 0, 0, 0.14); border: 2px dashed var(--line); border-radius: 14px; padding: 14px; margin: 8px 0; position: relative; }
+.brew-bean { font-size: 42px; width: 64px; height: 64px; background: var(--bg); border: 3px solid var(--ol); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: none; z-index: 3; transition: transform 0.15s ease, opacity 0.2s ease; box-shadow: 0 4px 0 var(--ol); }
+.brew-arrow { font-size: 13px; font-weight: 700; opacity: 0.75; }
+.brew-machine { width: 96px; display: flex; flex-direction: column; align-items: center; position: relative; }
+.bm-hopper { width: 54px; height: 24px; background: #7a5236; border: 2.5px solid var(--ol); border-radius: 4px 4px 14px 14px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.bm-body { width: 84px; height: 66px; background: #4a3528; border: 2.5px solid var(--ol); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ffda79; font-size: 26px; box-shadow: 0 4px 0 var(--ol); }
+.bm-body small { font-size: 11px; font-weight: 700; margin-top: 2px; }
+.bm-blade { display: inline-block; transition: transform 0.08s linear; }
+.bm-powder { font-size: 22px; margin-top: -8px; opacity: 0; transition: all 0.15s ease; }
+.brew-machine.shake { animation: mShake 0.14s ease; }
+@keyframes mShake { 0%, 100% { transform: translateX(0); } 30% { transform: translateX(-4px); } 70% { transform: translateX(4px); } }
+.brew-pour-stage { flex-direction: column; gap: 6px; min-height: 165px; }
+.brew-filter { position: relative; display: flex; flex-direction: column; align-items: center; }
+.bf-cup { width: 46px; height: 22px; background: #6b4a35; border: 2.5px solid var(--ol); border-radius: 4px 4px 14px 14px; z-index: 2; }
+.bf-powder { font-size: 20px; position: absolute; top: -22px; opacity: 0.4; transition: all 0.35s ease; }
+.bf-powder.dropped { top: 2px; opacity: 1; }
+.bf-stream { width: 6px; height: 0px; border-radius: 3px; transition: height 0.1s linear; }
+.brew-glass { width: 58px; height: 68px; border: 3px solid var(--ol); border-top: none; border-radius: 4px 4px 14px 14px; background: rgba(255, 255, 255, 0.25); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.bg-target { position: absolute; left: 0; right: 0; bottom: 75%; height: 10%; border-top: 2px dashed #ffca57; border-bottom: 2px dashed #ffca57; background: rgba(255, 202, 87, 0.25); z-index: 2; }
+.bg-liquid { position: absolute; left: 0; right: 0; bottom: 0; height: 0%; transition: height 0.05s linear; }
+.bg-icon { position: relative; z-index: 3; font-size: 24px; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); }
